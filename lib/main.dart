@@ -1,5 +1,5 @@
-import 'package:fitness_dashboard_ui/const/constant.dart';
-import 'package:fitness_dashboard_ui/screens/main_screen.dart';
+import 'package:fitness_dashboard_ui/UI/const/constant.dart';
+import 'package:fitness_dashboard_ui/UI/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {

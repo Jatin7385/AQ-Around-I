@@ -1,6 +1,6 @@
-import 'package:fitness_dashboard_ui/const/constant.dart';
-import 'package:fitness_dashboard_ui/data/line_chart_data.dart';
-import 'package:fitness_dashboard_ui/widgets/custom_card_widget.dart';
+import 'package:fitness_dashboard_ui/UI/const/constant.dart';
+import 'package:fitness_dashboard_ui/UI/data/line_chart_data.dart';
+import 'package:fitness_dashboard_ui/UI/widgets/custom_card_widget.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -41,7 +41,8 @@ class LineChartCard extends StatelessWidget {
                       getTitlesWidget: (double value, TitleMeta meta) {
                         return data.bottomTitle[value.toInt()] != null
                             ? SideTitleWidget(
-                                axisSide: meta.axisSide,
+                                // axisSide: meta.axisSide,
+                                meta: meta,
                                 child: Text(
                                     data.bottomTitle[value.toInt()].toString(),
                                     style: TextStyle(

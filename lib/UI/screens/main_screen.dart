@@ -1,7 +1,7 @@
-import 'package:fitness_dashboard_ui/util/responsive.dart';
-import 'package:fitness_dashboard_ui/widgets/dashboard_widget.dart';
-import 'package:fitness_dashboard_ui/widgets/side_menu_widget.dart';
-import 'package:fitness_dashboard_ui/widgets/summary_widget.dart';
+import 'package:fitness_dashboard_ui/UI/util/responsive.dart';
+import 'package:fitness_dashboard_ui/UI/widgets/dashboard_widget.dart';
+import 'package:fitness_dashboard_ui/UI/widgets/side_menu_widget.dart';
+import 'package:fitness_dashboard_ui/UI/widgets/summary_widget.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatelessWidget {
@@ -10,14 +10,15 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDesktop = Responsive.isDesktop(context);
-
+      print("Context :: $context"); 
+      print("Is Desktop :: $isDesktop");
     return Scaffold(
-      drawer: !isDesktop
-          ? const SizedBox(
-              width: 250,
-              child: SideMenuWidget(),
-            )
-          : null,
+      // drawer: !isDesktop
+      //     ? const SizedBox(
+      //         width: 250,
+      //         child: SideMenuWidget(),
+      //       )
+      //     : null,
       endDrawer: Responsive.isMobile(context)
           ? SizedBox(
               width: MediaQuery.of(context).size.width * 0.8,
@@ -27,13 +28,13 @@ class MainScreen extends StatelessWidget {
       body: SafeArea(
         child: Row(
           children: [
-            if (isDesktop)
-              Expanded(
-                flex: 2,
-                child: SizedBox(
-                  child: SideMenuWidget(),
-                ),
-              ),
+            // if (isDesktop)
+              // Expanded(
+              //   flex: 2,
+              //   child: SizedBox(
+              //     child: SideMenuWidget(),
+              //   ),
+              // ),
             Expanded(
               flex: 7,
               child: DashboardWidget(),

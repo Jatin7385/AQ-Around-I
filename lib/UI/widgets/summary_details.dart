@@ -1,4 +1,4 @@
-import 'package:fitness_dashboard_ui/widgets/custom_card_widget.dart';
+import 'package:fitness_dashboard_ui/UI/widgets/custom_card_widget.dart';
 import 'package:flutter/material.dart';
 
 class SummaryDetails extends StatelessWidget {

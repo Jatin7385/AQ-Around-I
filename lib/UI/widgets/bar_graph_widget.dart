@@ -1,6 +1,6 @@
-import 'package:fitness_dashboard_ui/data/bar_graph_data.dart';
-import 'package:fitness_dashboard_ui/model/graph_model.dart';
-import 'package:fitness_dashboard_ui/widgets/custom_card_widget.dart';
+import 'package:fitness_dashboard_ui/UI/data/bar_graph_data.dart';
+import 'package:fitness_dashboard_ui/UI/model/graph_model.dart';
+import 'package:fitness_dashboard_ui/UI/widgets/custom_card_widget.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
