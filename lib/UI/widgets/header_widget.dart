@@ -14,7 +14,7 @@ class HeaderWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Cigarette & AQI Tracker',
+              'AQ Around I',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
