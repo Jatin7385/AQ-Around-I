@@ -3,7 +3,12 @@ import 'package:fitness_dashboard_ui/UI/data/side_menu_data.dart';
 import 'package:flutter/material.dart';
 
 class SideMenuWidget extends StatefulWidget {
-  const SideMenuWidget({super.key});
+  final Function(int) onItemSelected;
+
+  const SideMenuWidget({
+    super.key,
+    required this.onItemSelected
+  });
 
   @override
   State<SideMenuWidget> createState() => _SideMenuWidgetState();
@@ -11,11 +16,10 @@ class SideMenuWidget extends StatefulWidget {
 
 class _SideMenuWidgetState extends State<SideMenuWidget> {
   int selectedIndex = 0;
+  final data = SideMenuData();
 
   @override
   Widget build(BuildContext context) {
-    final data = SideMenuData();
-
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 20),
       color: const Color(0xFF171821),
@@ -38,9 +42,12 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
         color: isSelected ? selectionColor : Colors.transparent,
       ),
       child: InkWell(
-        onTap: () => setState(() {
-          selectedIndex = index;
-        }),
+        onTap: () {
+          setState(() {
+            selectedIndex = index;
+          });
+          widget.onItemSelected(index);
+        },
         child: Row(
           children: [
             Padding(

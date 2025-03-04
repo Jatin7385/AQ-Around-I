@@ -3,6 +3,7 @@ import 'package:fitness_dashboard_ui/UI/widgets/dashboard_widget.dart';
 import 'package:fitness_dashboard_ui/UI/widgets/side_menu_widget.dart';
 import 'package:fitness_dashboard_ui/UI/widgets/summary_widget.dart';
 import 'package:fitness_dashboard_ui/UI/widgets/bottom_navigation_widget.dart';
+import 'package:fitness_dashboard_ui/UI/screens/bookmarks_page.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
@@ -14,6 +15,13 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+
+  // List of screens to navigate between
+  final List<Widget> _screens = [
+    const DashboardWidget(),
+    const BookmarksScreen(),
+    // Add other screens as needed
+  ];
 
   void _onItemSelected(int index) {
     setState(() {
@@ -40,7 +48,7 @@ class _MainScreenState extends State<MainScreen> {
           children: [
             Expanded(
               flex: 7,
-              child: DashboardWidget(),
+              child: _screens[_selectedIndex],
             ),
             if (isDesktop)
               Expanded(
