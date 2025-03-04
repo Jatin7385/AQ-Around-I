@@ -29,3 +29,5 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/  
+    - assets/images/cigs_1.gif
+    - assets/images/cigs_2.gif

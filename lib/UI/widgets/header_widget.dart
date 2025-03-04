@@ -1,81 +1,75 @@
+import 'package:flutter/material.dart';
 import 'package:fitness_dashboard_ui/UI/const/constant.dart';
 import 'package:fitness_dashboard_ui/UI/util/responsive.dart';
-import 'package:flutter/material.dart';
 
 class HeaderWidget extends StatelessWidget {
   const HeaderWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (!Responsive.isDesktop(context))
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: InkWell(
-              onTap: () => Scaffold.of(context).openDrawer(),
-              child: Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: Icon(
-                  Icons.menu,
-                  color: Colors.grey,
-                  size: 25,
-                ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Cigarette & AQI Tracker',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: primaryColor,
               ),
             ),
-          ),
-        if (!Responsive.isMobile(context))
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: cardBackgroundColor,
-                enabledBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.transparent),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 5,
-                ),
-                hintText: 'Search',
-                prefixIcon: const Icon(
-                  Icons.search,
-                  color: Colors.grey,
-                  size: 21,
-                ),
+            IconButton(
+              icon: Icon(
+                Icons.notifications,
+                color: primaryColor,
               ),
+              onPressed: () {
+                // Implement notification logic
+              },
             ),
-          ),
-        if (Responsive.isMobile(context))
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(
-                  Icons.search,
-                  color: Colors.grey,
-                  size: 25,
-                ),
-                onPressed: () {},
+          ],
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          decoration: InputDecoration(
+            hintText: 'Search location or region',
+            prefixIcon: Icon(
+              Icons.search,
+              color: primaryColor,
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                Icons.location_on,
+                color: primaryColor,
               ),
-              InkWell(
-                onTap: () => Scaffold.of(context).openEndDrawer(),
-                child: CircleAvatar(
-                  backgroundColor: Colors.transparent,
-                  child: Image.asset(
-                    "assets/images/avatar.png",
-                    width: 32,
-                  ),
-                ),
-              ),
-            ],
+              onPressed: () {
+                // Implement current location detection
+              },
+            ),
+            filled: true,
+            fillColor: cardBackgroundColor,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: primaryColor, width: 2),
+            ),
+            contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
           ),
+          onChanged: (value) {
+            // Implement search functionality
+            print('Searching for: $value');
+          },
+        ),
       ],
     );
   }
