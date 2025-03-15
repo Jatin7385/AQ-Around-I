@@ -1,12 +1,11 @@
-# AQ Around I - Fitness Dashboard with Air Quality Monitoring
+# AQ Around I - Air Quality Monitoring
 
-A modern Flutter application that combines fitness tracking with real-time air quality monitoring to help users make informed decisions about outdoor activities.
+A modern Flutter application that tracks real-time air quality monitoring to help users make informed decisions about outdoor activities.
 
 ## Features
 
 - **Air Quality Monitoring**: Real-time air quality data from Google Maps Air Quality API
 - **Cigarette Consumption Tracking**: Monitor smoking habits and health risks
-- **Activity Tracking**: Track steps and physical activity
 - **Health Recommendations**: Get health recommendations based on air quality
 - **Pollutant Details**: Detailed information about various pollutants
 - **Responsive Design**: Works on mobile, tablet, and desktop
