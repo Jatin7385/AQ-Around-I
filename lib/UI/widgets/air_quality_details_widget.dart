@@ -4,24 +4,23 @@ import 'package:fitness_dashboard_ui/UI/const/constant.dart';
 import 'package:fitness_dashboard_ui/UI/model/air_quality_model.dart';
 import 'package:fitness_dashboard_ui/UI/services/air_quality_service.dart';
 import 'package:fitness_dashboard_ui/UI/services/location_service.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'dart:developer' as developer;
 
-class AQISummaryWidget extends StatefulWidget {
+class AirQualityDetailsWidget extends StatefulWidget {
   final LocationService locationService;
   
-  const AQISummaryWidget({
+  const AirQualityDetailsWidget({
     super.key,
     required this.locationService,
   });
 
   @override
-  State<AQISummaryWidget> createState() => _AQISummaryWidgetState();
+  State<AirQualityDetailsWidget> createState() => _AirQualityDetailsWidgetState();
 }
 
-class _AQISummaryWidgetState extends State<AQISummaryWidget> {
+class _AirQualityDetailsWidgetState extends State<AirQualityDetailsWidget> {
   bool _isLoading = true;
   AirQualityData? _airQualityData;
   String _errorMessage = '';
@@ -30,13 +29,13 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
   @override
   void initState() {
     super.initState();
-    developer.log('AQISummaryWidget initialized', name: 'aqi.widget');
+    developer.log('AirQualityDetailsWidget initialized', name: 'air.quality.details');
     _fetchAirQualityData();
     
     // Listen for location changes
     _locationSubscription = widget.locationService.locationStream.listen((locationData) {
-      developer.log('Location updated in AQISummaryWidget: ${locationData.locationName}', 
-          name: 'aqi.widget');
+      developer.log('Location updated in AirQualityDetailsWidget: ${locationData.locationName}', 
+          name: 'air.quality.details');
       _fetchAirQualityForLocation(
         locationData.latitude, 
         locationData.longitude,
@@ -72,7 +71,7 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
       }
       
       // Otherwise try to get current location
-      final Position? position = await AirQualityService.getCurrentLocation();
+      final position = await AirQualityService.getCurrentLocation();
       
       if (position == null) {
         setState(() {
@@ -101,7 +100,7 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
       });
     } catch (e, stackTrace) {
       developer.log('Error fetching air quality data',
-          name: 'aqi.widget.error',
+          name: 'air.quality.details.error',
           error: e,
           stackTrace: stackTrace);
       setState(() {
@@ -119,7 +118,7 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
 
     try {
       developer.log('Fetching air quality for location: $locationName ($lat, $lng)', 
-          name: 'aqi.widget');
+          name: 'air.quality.details');
       final airQualityData = await AirQualityService.getAirQuality(lat, lng);
       
       setState(() {
@@ -128,7 +127,7 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
       });
     } catch (e, stackTrace) {
       developer.log('Error fetching air quality for location',
-          name: 'aqi.widget.error',
+          name: 'air.quality.details.error',
           error: e,
           stackTrace: stackTrace);
       setState(() {
@@ -152,13 +151,13 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
               Row(
                 children: [
                   Icon(
-                    Icons.air,
+                    Icons.science,
                     color: primaryColor,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Air Quality Index',
+                    'Pollutants Detail',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -177,7 +176,7 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
               ),
             ],
           ),
-
+          
           const SizedBox(height: 16),
           
           // Content
@@ -185,8 +184,8 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
             _buildLoadingState()
           else if (_errorMessage.isNotEmpty)
             _buildErrorState()
-          else if (_airQualityData != null)
-            _buildAirQualityData(_airQualityData!)
+          else if (_airQualityData != null && _airQualityData!.pollutants.isNotEmpty)
+            _buildPollutantsData(_airQualityData!)
           else
             _buildNoDataState(),
         ],
@@ -204,7 +203,7 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Loading air quality data...',
+            'Loading pollutants data...',
             style: TextStyle(
               color: Colors.grey[400],
               fontSize: 14,
@@ -272,7 +271,7 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
           ),
           const SizedBox(height: 16),
           Text(
-            'No Data Available',
+            'No Pollutants Data Available',
             style: TextStyle(
               color: Colors.grey[400],
               fontSize: 16,
@@ -284,137 +283,36 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
     );
   }
 
-  Widget _buildAirQualityData(AirQualityData data) {
-    final color = data.getAqiColor();
-    final recommendation = data.getHealthRecommendation();
+  Widget _buildPollutantsData(AirQualityData data) {
+    final pollutants = data.pollutants;
     final formattedTime = DateFormat('MMM d, h:mm a').format(data.timestamp);
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // AQI value and location
+        // Location and time
         Row(
-          children: [
-            // AQI value with circular indicator
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color.withOpacity(0.1),
-                border: Border.all(
-                  color: color,
-                  width: 2,
-                ),
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      data.aqi.toStringAsFixed(0),
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: color,
-                      ),
-                    ),
-                    Text(
-                      'AQI',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[400],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            // Location and category
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    data.locationName,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      data.category,
-                      style: TextStyle(
-                        color: color,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Updated: $formattedTime',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[400],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        
-        const SizedBox(height: 16),
-        
-        // Divider
-        Divider(
-          color: Colors.grey.withOpacity(0.2),
-          thickness: 1,
-        ),
-        
-        const SizedBox(height: 16),
-        
-        // Health recommendation
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(
-              Icons.health_and_safety,
+              Icons.location_on,
               color: primaryColor,
-              size: 20,
+              size: 16,
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Health Recommendation',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    recommendation,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[400],
-                    ),
-                  ),
-                ],
+            const SizedBox(width: 4),
+            Text(
+              data.locationName,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              'Updated: $formattedTime',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[400],
               ),
             ),
           ],
@@ -422,34 +320,140 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
         
         const SizedBox(height: 16),
         
-        // Dominant pollutant
-        if (data.dominantPollutant != 'Unknown' && data.dominantPollutant != 'N/A')
-          Row(
+        // Pollutants grid
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 1.5,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+          ),
+          itemCount: pollutants.length,
+          itemBuilder: (context, index) {
+            final pollutantKey = pollutants.keys.elementAt(index);
+            final pollutant = pollutants[pollutantKey]!;
+            
+            return _buildPollutantCard(pollutant, pollutantKey == data.dominantPollutant);
+          },
+        ),
+        
+        const SizedBox(height: 16),
+        
+        // Pollutants explanation
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: backgroundColor.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(borderRadius),
+            border: Border.all(
+              color: primaryColor.withOpacity(0.2),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.warning_amber,
-                color: accentColor,
-                size: 20,
+              const Text(
+                'About Pollutants',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(height: 8),
               Text(
-                'Dominant Pollutant: ',
+                'PM2.5: Fine particulate matter that can penetrate deep into the lungs.\n'
+                'PM10: Coarse particulate matter from dust, pollen, and mold.\n'
+                'O3: Ozone, a reactive gas that can irritate airways.\n'
+                'NO2: Nitrogen dioxide from vehicle emissions and power plants.\n'
+                'SO2: Sulfur dioxide from burning fossil fuels.\n'
+                'CO: Carbon monoxide, a colorless, odorless gas from combustion.',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey[400],
                 ),
               ),
-              Text(
-                data.dominantPollutant,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
             ],
           ),
+        ),
       ],
     );
   }
-}
+  
+  Widget _buildPollutantCard(PollutantData pollutant, bool isDominant) {
+    Color cardColor;
+    
+    // Simplified color assignment based on pollutant type
+    if (pollutant.displayName.contains('PM')) {
+      cardColor = dangerColor;
+    } else if (pollutant.displayName.contains('O3')) {
+      cardColor = accentColor;
+    } else if (pollutant.displayName.contains('NO2')) {
+      cardColor = Colors.deepOrange;
+    } else if (pollutant.displayName.contains('SO2')) {
+      cardColor = Colors.purple;
+    } else if (pollutant.displayName.contains('CO')) {
+      cardColor = Colors.brown;
+    } else {
+      cardColor = primaryColor;
+    }
+    
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: cardColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(borderRadius),
+        border: isDominant 
+            ? Border.all(color: cardColor, width: 2)
+            : null,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                pollutant.displayName,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: cardColor,
+                ),
+              ),
+              if (isDominant) ...[
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.warning_amber,
+                  color: cardColor,
+                  size: 16,
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${pollutant.concentration.toStringAsFixed(1)} ${pollutant.units}',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            pollutant.fullName,
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey[400],
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+} 
