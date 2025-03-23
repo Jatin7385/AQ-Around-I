@@ -19,7 +19,7 @@ class DashboardWidget extends StatefulWidget {
 
 class _DashboardWidgetState extends State<DashboardWidget> {
   final LocationService _locationService = LocationService();
-  bool _showLocationSearch = false;
+  bool _showLocationSearch = true;
 
   @override
   void initState() {
@@ -39,94 +39,23 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     print('dashboard_widget :: _onLocationSelected end');
   }
 
-  @override
-  Widget build(BuildContext context) {
-    print('dashboard_widget :: build start');
-    final isDesktop = Responsive.isDesktop(context);
-    final isTablet = Responsive.isTablet(context);
-    
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 18),
-            const HeaderWidget(),
-            const SizedBox(height: 18),
+@override
+Widget build(BuildContext context) {
+  final isSmallScreen = MediaQuery.of(context).size.width < 400;
+  
+  return SingleChildScrollView(
+    child: Padding(
+      padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 12 : 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 5),
             
-            // Location Search
+          if (_showLocationSearch)
             Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.location_on,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Location',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                  TextButton.icon(
-                    icon: Icon(
-                      _showLocationSearch ? Icons.close : Icons.search,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    label: Text(
-                      _showLocationSearch ? 'Cancel' : 'Search Location',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _showLocationSearch = !_showLocationSearch;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-            
-            if (_showLocationSearch)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 18),
-                child: LocationSearchWidget(
-                  onLocationSelected: _onLocationSelected,
-                ),
-              ),
-            
-            // Air Quality Section Title
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.air_outlined,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Air Quality & Health',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
+              padding: const EdgeInsets.only(bottom: 18),
+              child: LocationSearchWidget(
+                onLocationSelected: _onLocationSelected,
               ),
             ),
             

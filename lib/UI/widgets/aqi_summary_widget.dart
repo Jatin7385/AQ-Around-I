@@ -99,14 +99,14 @@ Widget build(BuildContext context) {
     color: Color(0xFF1A1C1E),
     child: SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        // Reduce side padding to allow more space
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            // Improved parent container for Air Quality Summary
+            // Improved parent container with more breathing room
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                // Enhanced background with gradient
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -124,18 +124,18 @@ Widget build(BuildContext context) {
                   ),
                 ],
               ),
+              // Add more internal padding
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Enhanced header
+                    // Header with reduced space
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Row(
                           children: [
-                            // Improved icon container
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
@@ -153,33 +153,23 @@ Widget build(BuildContext context) {
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 0.5,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
                             ),
                           ],
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    // Increase spacing between header and card
+                    const SizedBox(height: 20),
 
-                    // Keep original AQI card functionality
-                    SizedBox(
-                      width: double.infinity,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: _buildAQICard(
-                              'assets/images/cigs_1.gif',
-                              _data?.localAqi.toStringAsFixed(0) ?? dataNotAvailable,
-                              _data?.universalAqi.toStringAsFixed(0) ?? dataNotAvailable,
-                            ),
-                          ),
-                        ],
-                      ),
+                    _buildAQICard(
+                      'assets/images/cigs_1.gif',
+                      _data?.localAqi.toStringAsFixed(0) ?? dataNotAvailable,
+                      _data?.universalAqi.toStringAsFixed(0) ?? dataNotAvailable,
                     ),
+                    
+                    // Increase spacing between AQI card and recommendations
                     const SizedBox(height: 24),
 
-                    // Original Health Recommendations widget
                     HealthRecommendationsWidget(
                       recommendations: _data?.healthRecommendations,
                     ),
@@ -187,12 +177,15 @@ Widget build(BuildContext context) {
                 ),
               ),
             ),
+            // Add bottom spacing
+            const SizedBox(height: 16),
           ],
         ),
       ),
     ),
   );
 }
+
 
 Widget _buildAQICard(String gifUrl, String localAqi, String universalAqi) {
   // Convert AQI strings to double safely
@@ -203,95 +196,139 @@ Widget _buildAQICard(String gifUrl, String localAqi, String universalAqi) {
   String emojiForAQI = _getEmojiForAQI(safeLocalAqi);
 
   return Container(
-    padding: const EdgeInsets.all(24), // Increased padding
+    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
     decoration: BoxDecoration(
       gradient: LinearGradient(
         colors: _getAQIGradient(safeLocalAqi),
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
-      borderRadius: BorderRadius.circular(20), // Slightly larger radius
+      borderRadius: BorderRadius.circular(20),
       boxShadow: [
         BoxShadow(
           color: Colors.black.withOpacity(0.3),
-          blurRadius: 12, // Increased blur for more prominence
-          offset: Offset(3, 6), // Increased offset for deeper shadow
+          blurRadius: 12,
+          offset: Offset(3, 6),
         ),
       ],
     ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // GIF on the left - larger size
-        ClipRRect(
-          borderRadius: BorderRadius.circular(16), // Larger rounded corners
-          child: Image.asset(
-            gifUrl,
-            width: 80, // Increased from 60
-            fit: BoxFit.cover,
-          ),
-        ),
-        const SizedBox(width: 20), // Increased spacing
-
-        // Text stacked vertically in the middle - larger text
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Local AQI: ${localAqi}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22, // Increased from 18
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 6), // Add spacing between text elements
-              Text(
-                'Universal AQI: ${universalAqi}',
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 20, // Increased from 16
-                ),
-              ),
-              const SizedBox(height: 6), // Add spacing between text elements
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Cigarettes Smoked: ',
-                      style: const TextStyle(
-                        color: Colors.white60,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold, // Made bold
-                      ),
-                    ),
-                    TextSpan(
-                      text: '${_calculateCigarettes(safeLocalAqi)}',
-                      style: const TextStyle(
-                        color: Colors.white60,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold, // Made bold
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallScreen = constraints.maxWidth < 340;
         
-        // Emoji on the right side
-        Text(
-          emojiForAQI,
-          style: const TextStyle(
-            fontSize: 48, // Large emoji
-          ),
-        ),
-      ],
+        // Use Column for very small screens, Row for larger screens
+        return isSmallScreen 
+            ? Column(
+                children: [
+                  // GIF centered
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.asset(
+                        gifUrl,
+                        width: 60,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Text info
+                  _buildAQITextInfo(localAqi, universalAqi, safeLocalAqi),
+                  
+                  const SizedBox(height: 12),
+                  
+                  // Emoji
+                  Center(
+                    child: Text(
+                      emojiForAQI,
+                      style: const TextStyle(
+                        fontSize: 40,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // GIF on the left
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      gifUrl,
+                      width: constraints.maxWidth < 400 ? 60 : 80,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  
+                  // Text in the middle
+                  Expanded(
+                    child: _buildAQITextInfo(localAqi, universalAqi, safeLocalAqi),
+                  ),
+                  
+                  // Emoji on the right
+                  Text(
+                    emojiForAQI,
+                    style: const TextStyle(
+                      fontSize: 48,
+                    ),
+                  ),
+                ],
+              );
+      },
     ),
   );
 }
+
+Widget _buildAQITextInfo(String localAqi, String universalAqi, double safeLocalAqi) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        'Local AQI: ${localAqi}',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      const SizedBox(height: 6),
+      Text(
+        'Universal AQI: ${universalAqi}',
+        style: TextStyle(
+          color: Colors.white70,
+          fontSize: 18,
+        ),
+      ),
+      const SizedBox(height: 6),
+      RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: 'Cigarettes: ',
+              style: TextStyle(
+                color: Colors.white60,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            TextSpan(
+              text: '${_calculateCigarettes(safeLocalAqi)}',
+              style: TextStyle(
+                color: Colors.white60,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
 
 // Helper method to get the appropriate emoji based on AQI value
 String _getEmojiForAQI(double aqi) {

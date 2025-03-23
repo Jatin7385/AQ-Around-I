@@ -44,101 +44,105 @@ class _HealthRecommendationsWidgetState extends State<HealthRecommendationsWidge
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Color(0xFF1E2428), // Dark blue-grey background matching the app theme
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.black12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.health_and_safety, 
-                  color: Colors.blue[300],
-                  size: 22,
-                ),
-                const SizedBox(width: 10),
-                Text(
+Widget build(BuildContext context) {
+  final isSmallScreen = MediaQuery.of(context).size.width < 400;
+  
+  return Container(
+    width: double.infinity,
+    decoration: BoxDecoration(
+      color: Color(0xFF1E2428),
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: Colors.black12),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Header
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+          child: Row(
+            children: [
+              Icon(
+                Icons.health_and_safety, 
+                color: Colors.blue[300],
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
                   'Health Recommendations',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 18,
+                    fontSize: isSmallScreen ? 16 : 18,
                     fontWeight: FontWeight.w600,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+        ),
 
-          // Tab Bar with color-coded tabs
-          Container(
-            height: 46,
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            child: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              indicatorSize: TabBarIndicatorSize.tab,
-              indicator: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.blue, // Default selected color, will be overridden in tab generation
-              ),
-              dividerColor: Colors.transparent,
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.grey[400],
-              labelStyle: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-              ),
-              unselectedLabelStyle: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w400,
-              ),
-              padding: EdgeInsets.zero,
-              tabs: List.generate(7, (index) {
-                return _buildColorCodedTab(index);
-              }),
+        // Tab Bar with scrollable tabs
+        Container(
+          height: 40,
+          margin: const EdgeInsets.symmetric(horizontal: 12),
+          child: TabBar(
+            controller: _tabController,
+            isScrollable: true,
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicator: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.blue,
             ),
+            dividerColor: Colors.transparent,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.grey[400],
+            labelStyle: TextStyle(
+              fontSize: isSmallScreen ? 13 : 15,
+              fontWeight: FontWeight.bold,
+            ),
+            unselectedLabelStyle: TextStyle(
+              fontSize: isSmallScreen ? 13 : 15,
+              fontWeight: FontWeight.w400,
+            ),
+            padding: EdgeInsets.zero,
+            tabs: List.generate(7, (index) {
+              return _buildColorCodedTab(index);
+            }),
           ),
+        ),
 
-          // Tab Content
-          Container(
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Color(0xFF1A1F24), // Slightly darker background for content
-              borderRadius: BorderRadius.circular(16),
-            ),
-            constraints: BoxConstraints(
-              minHeight: 150,
-              maxHeight: 220,
-            ),
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildRecommendationContent(widget.recommendations?.generalPopulation, 'General Population', Icons.people, 0),
-                _buildRecommendationContent(widget.recommendations?.elderly, 'Elderly', Icons.elderly, 1),
-                _buildRecommendationContent(widget.recommendations?.lungDiseasePopulation, 'People with Lung Disease', Icons.air, 2),
-                _buildRecommendationContent(widget.recommendations?.heartDiseasePopulation, 'People with Heart Disease', Icons.favorite, 3),
-                _buildRecommendationContent(widget.recommendations?.athletes, 'Athletes & Active Individuals', Icons.fitness_center, 4),
-                _buildRecommendationContent(widget.recommendations?.pregnantWomen, 'Pregnant Women', Icons.pregnant_woman, 5),
-                _buildRecommendationContent(widget.recommendations?.children, 'Children', Icons.child_care, 6),
-              ],
-            ),
+        // Tab Content - adjusted height
+        Container(
+          margin: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Color(0xFF1A1F24),
+            borderRadius: BorderRadius.circular(16),
           ),
-        ],
-      ),
-    );
-  }
-  
+          constraints: BoxConstraints(
+            minHeight: 120,
+            maxHeight: isSmallScreen ? 180 : 220,
+          ),
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildRecommendationContent(widget.recommendations?.generalPopulation, 'General Population', Icons.people, 0),
+              _buildRecommendationContent(widget.recommendations?.elderly, 'Elderly', Icons.elderly, 1),
+              _buildRecommendationContent(widget.recommendations?.lungDiseasePopulation, 'People with Lung Disease', Icons.air, 2),
+              _buildRecommendationContent(widget.recommendations?.heartDiseasePopulation, 'People with Heart Disease', Icons.favorite, 3),
+              _buildRecommendationContent(widget.recommendations?.athletes, 'Athletes & Active Individuals', Icons.fitness_center, 4),
+              _buildRecommendationContent(widget.recommendations?.pregnantWomen, 'Pregnant Women', Icons.pregnant_woman, 5),
+              _buildRecommendationContent(widget.recommendations?.children, 'Children', Icons.child_care, 6),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
   // Custom color-coded tab
   Widget _buildColorCodedTab(int index) {
     Color tabColor = _getCategoryColor(index);
@@ -180,29 +184,29 @@ class _HealthRecommendationsWidgetState extends State<HealthRecommendationsWidge
     }
     
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 3),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Tab(
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: _tabController.index == index ? tabColor : Colors.transparent,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(tabIcon, size: 16),
-              SizedBox(width: 6),
-              Text(tabText),
-            ],
-          ),
+    margin: EdgeInsets.symmetric(horizontal: 2),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: Tab(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: _tabController.index == index ? tabColor : Colors.transparent,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(tabIcon, size: 14),
+            SizedBox(width: 4),
+            Text(tabText),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   // Enhanced recommendation content with color coding
   Widget _buildRecommendationContent(String? content, String title, IconData icon, int index) {

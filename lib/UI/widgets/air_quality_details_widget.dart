@@ -293,56 +293,65 @@ class _AirQualityDetailsWidgetState extends State<AirQualityDetailsWidget> {
     final formattedTime = DateFormat('MMM d, h:mm a').format(data.timestamp);
     
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Location and time
-        Row(
-          children: [
-            Icon(
-              Icons.location_on,
-              color: primaryColor,
-              size: 16,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              data.locationName,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      // Location and time - make this row wrap properly
+      Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        spacing: 8,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.location_on,
+                color: primaryColor,
+                size: 16,
               ),
-            ),
-            const Spacer(),
-            Text(
-              'Updated: $formattedTime',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[400],
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  data.locationName,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
-          ],
-        ),
-        
-        const SizedBox(height: 16),
-        
-        // Pollutants grid
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 1.5,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
+            ],
           ),
-          itemCount: pollutants.length,
-          itemBuilder: (context, index) {
-            final pollutantKey = pollutants.keys.elementAt(index);
-            final pollutant = pollutants[pollutantKey]!;
-            
-            return _buildPollutantCard(pollutant, pollutantKey == data.dominantPollutant);
-          },
+          Text(
+            'Updated: $formattedTime',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[400],
+            ),
+          ),
+        ],
+      ),
+      
+      const SizedBox(height: 16),
+      
+      // Make GridView responsive based on screen width
+      GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: MediaQuery.of(context).size.width < 400 ? 1 : 2,
+          childAspectRatio: MediaQuery.of(context).size.width < 400 ? 2.5 : 1.5,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
         ),
+        itemCount: pollutants.length,
+        itemBuilder: (context, index) {
+          final pollutantKey = pollutants.keys.elementAt(index);
+          final pollutant = pollutants[pollutantKey]!;
+          
+          return _buildPollutantCard(pollutant, pollutantKey == data.dominantPollutant);
+        },
+      ),
         
         const SizedBox(height: 16),
         
@@ -407,37 +416,41 @@ class _AirQualityDetailsWidgetState extends State<AirQualityDetailsWidget> {
     }
     
     return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: cardColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(borderRadius),
-        border: isDominant 
-            ? Border.all(color: cardColor, width: 2)
-            : null,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: cardColor.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(borderRadius),
+      border: isDominant 
+          ? Border.all(color: cardColor, width: 2)
+          : null,
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
                 pollutant.displayName,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: cardColor,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
-              if (isDominant) ...[
-                const SizedBox(width: 4),
-                Icon(
-                  Icons.warning_amber,
-                  color: cardColor,
-                  size: 16,
-                ),
-              ],
+            ),
+            if (isDominant) ...[
+              const SizedBox(width: 4),
+              Icon(
+                Icons.warning_amber,
+                color: cardColor,
+                size: 16,
+              ),
             ],
-          ),
+          ],
+        ),
           const SizedBox(height: 4),
           Text(
             '${pollutant.concentration.toStringAsFixed(1)} ${pollutant.units}',
