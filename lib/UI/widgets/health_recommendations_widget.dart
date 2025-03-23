@@ -29,13 +29,28 @@ class _HealthRecommendationsWidgetState extends State<HealthRecommendationsWidge
     super.dispose();
   }
 
+  // Get appropriate color based on category
+  Color _getCategoryColor(int index) {
+    switch (index) {
+      case 0: return Colors.blue;
+      case 1: return Colors.purple;
+      case 2: return Colors.lightBlue;
+      case 3: return Colors.red;
+      case 4: return Colors.green;
+      case 5: return Colors.pink;
+      case 6: return Colors.amber;
+      default: return Colors.blue;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.grey[850]?.withOpacity(0.7),
+        color: Color(0xFF1E2428), // Dark blue-grey background matching the app theme
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.black12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,82 +58,79 @@ class _HealthRecommendationsWidgetState extends State<HealthRecommendationsWidge
         children: [
           // Header
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
             child: Row(
               children: [
-                Icon(Icons.health_and_safety, 
-                  color: Colors.blue[200],
-                  size: 20,
+                Icon(
+                  Icons.health_and_safety, 
+                  color: Colors.blue[300],
+                  size: 22,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Text(
-                  'Recommendations',
+                  'Health Recommendations',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
           ),
 
-          // Tab Bar
+          // Tab Bar with color-coded tabs
           Container(
-            height: 40,
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Colors.grey[900],
-              borderRadius: BorderRadius.circular(12),
-            ),
+            height: 46,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
             child: TabBar(
               controller: _tabController,
               isScrollable: true,
+              indicatorSize: TabBarIndicatorSize.tab,
               indicator: BoxDecoration(
-                color: Colors.white10,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.blue, // Default selected color, will be overridden in tab generation
               ),
+              dividerColor: Colors.transparent,
               labelColor: Colors.white,
               unselectedLabelColor: Colors.grey[400],
               labelStyle: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
               ),
-              tabs: const [
-                Tab(text: 'General'),
-                Tab(text: 'Elderly'),
-                Tab(text: 'Lung Disease'),
-                Tab(text: 'Heart Disease'),
-                Tab(text: 'Athletes'),
-                Tab(text: 'Pregnant'),
-                Tab(text: 'Children'),
-              ],
+              unselectedLabelStyle: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+              ),
+              padding: EdgeInsets.zero,
+              tabs: List.generate(7, (index) {
+                return _buildColorCodedTab(index);
+              }),
             ),
           ),
 
           // Tab Content
           Container(
-            margin: const EdgeInsets.all(20),
-            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.grey[900],
-              borderRadius: BorderRadius.circular(12),
+              color: Color(0xFF1A1F24), // Slightly darker background for content
+              borderRadius: BorderRadius.circular(16),
             ),
             constraints: BoxConstraints(
-              minHeight: 100,
-              maxHeight: 200,
+              minHeight: 150,
+              maxHeight: 220,
             ),
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildRecommendationText(widget.recommendations?.generalPopulation ?? 'Data not available'),
-                _buildRecommendationText(widget.recommendations?.elderly ?? 'Data not available'),
-                _buildRecommendationText(widget.recommendations?.lungDiseasePopulation ?? 'Data not available'),
-                _buildRecommendationText(widget.recommendations?.heartDiseasePopulation ?? 'Data not available'),
-                _buildRecommendationText(widget.recommendations?.athletes ?? 'Data not available'),
-                _buildRecommendationText(widget.recommendations?.pregnantWomen ?? 'Data not available'),
-                _buildRecommendationText(widget.recommendations?.children ?? 'Data not available'),
+                _buildRecommendationContent(widget.recommendations?.generalPopulation, 'General Population', Icons.people, 0),
+                _buildRecommendationContent(widget.recommendations?.elderly, 'Elderly', Icons.elderly, 1),
+                _buildRecommendationContent(widget.recommendations?.lungDiseasePopulation, 'People with Lung Disease', Icons.air, 2),
+                _buildRecommendationContent(widget.recommendations?.heartDiseasePopulation, 'People with Heart Disease', Icons.favorite, 3),
+                _buildRecommendationContent(widget.recommendations?.athletes, 'Athletes & Active Individuals', Icons.fitness_center, 4),
+                _buildRecommendationContent(widget.recommendations?.pregnantWomen, 'Pregnant Women', Icons.pregnant_woman, 5),
+                _buildRecommendationContent(widget.recommendations?.children, 'Children', Icons.child_care, 6),
               ],
             ),
           ),
@@ -126,17 +138,109 @@ class _HealthRecommendationsWidgetState extends State<HealthRecommendationsWidge
       ),
     );
   }
-
-  Widget _buildRecommendationText(String text) {
-    return SingleChildScrollView(
-      child: Text(
-        text,
-        style: TextStyle(
-          color: Colors.grey[400],
-          fontSize: 14,
-          height: 1.5,
+  
+  // Custom color-coded tab
+  Widget _buildColorCodedTab(int index) {
+    Color tabColor = _getCategoryColor(index);
+    String tabText;
+    IconData tabIcon;
+    
+    switch (index) {
+      case 0:
+        tabText = 'General';
+        tabIcon = Icons.people;
+        break;
+      case 1:
+        tabText = 'Elderly';
+        tabIcon = Icons.elderly;
+        break;
+      case 2:
+        tabText = 'Lung Disease';
+        tabIcon = Icons.air;
+        break;
+      case 3:
+        tabText = 'Heart Disease';
+        tabIcon = Icons.favorite;
+        break;
+      case 4:
+        tabText = 'Athletes';
+        tabIcon = Icons.fitness_center;
+        break;
+      case 5:
+        tabText = 'Pregnant';
+        tabIcon = Icons.pregnant_woman;
+        break;
+      case 6:
+        tabText = 'Children';
+        tabIcon = Icons.child_care;
+        break;
+      default:
+        tabText = 'General';
+        tabIcon = Icons.people;
+    }
+    
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 3),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Tab(
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: _tabController.index == index ? tabColor : Colors.transparent,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(tabIcon, size: 16),
+              SizedBox(width: 6),
+              Text(tabText),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  // Enhanced recommendation content with color coding
+  Widget _buildRecommendationContent(String? content, String title, IconData icon, int index) {
+    final text = content ?? 'Data not available';
+    final Color categoryColor = _getCategoryColor(index);
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: categoryColor, size: 18),
+            SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                color: categoryColor,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        Divider(color: categoryColor.withOpacity(0.3), height: 24),
+        Expanded(
+          child: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
+            child: Text(
+              text,
+              style: TextStyle(
+                color: Colors.grey[300],
+                fontSize: 15,
+                height: 1.6,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

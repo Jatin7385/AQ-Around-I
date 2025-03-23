@@ -88,152 +88,238 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
 
   static String _calculateCigarettes(double aqi) {
     print('aqi_summary_widget :: _calculateCigarettes called');
-    return (aqi != -1) ? (aqi / 22).toStringAsFixed(1) : 'Data not available';
+    return (aqi != -1) ? (aqi / 22).toStringAsFixed(1) : dataNotAvailable;
   }
 
   @override
-  Widget build(BuildContext context) {
-    developer.log('Building AQISummaryWidget', name: 'widget.aqi');
-    print('aqi_summary_widget :: build start');
-    return Container(
-      color: Color(0xFF1A1C1E),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.grey[850]?.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(20),
+Widget build(BuildContext context) {
+  developer.log('Building AQISummaryWidget', name: 'widget.aqi');
+  print('aqi_summary_widget :: build start');
+  return Container(
+    color: Color(0xFF1A1C1E),
+    child: SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            // Improved parent container for Air Quality Summary
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                // Enhanced background with gradient
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF2D3035),
+                    Color(0xFF222528),
+                  ],
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.air, color: Colors.blue[200], size: 24),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Air Quality Summary',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                overflow: TextOverflow.ellipsis, // Prevents overflow
-                                maxLines: 1, // Ensures text doesn't wrap
-                              ),
-                            ],
-                          ),
-                          // Container(
-                          //   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          //   decoration: BoxDecoration(
-                          //     color: _getAQIColor(_data.localAqi).withOpacity(0.2),
-                          //     borderRadius: BorderRadius.circular(12),
-                          //   ),
-                          //   child: Text(
-                          //     _getAQICategory(_data.localAqi),
-                          //     style: TextStyle(
-                          //       color: _getAQIColor(_data.localAqi),
-                          //       fontSize: 14,
-                          //       fontWeight: FontWeight.w500,
-                          //     ),
-                          //   ),
-                          // ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-
-                      SizedBox(
-                        width: double.infinity, // Ensures it doesn't try to overflow
-                        // AQI Values
-                        child: Row(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.25),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Enhanced header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
                           children: [
-                            Expanded(
-                              child: _buildAQICard(
-                                'Local',
-                                _data?.localAqi.toStringAsFixed(0) ?? 'Data not available',
-                                Icons.location_on,
-                                Colors.orange,
+                            // Improved icon container
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.blue[800]?.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(10),
                               ),
+                              child: Icon(Icons.air, color: Colors.blue[200], size: 24),
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: _buildAQICard(
-                                'Universal',
-                                _data?.universalAqi.toStringAsFixed(0) ?? 'Data not available',
-                                Icons.public,
-                                Colors.blue,
+                            const SizedBox(width: 12),
+                            const Text(
+                              'Air Quality Summary',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
                               ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 24),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
 
-                      // Health Recommendations
-                      HealthRecommendationsWidget(
-                        recommendations: _data?.healthRecommendations,
+                    // Keep original AQI card functionality
+                    SizedBox(
+                      width: double.infinity,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _buildAQICard(
+                              'assets/images/cigs_1.gif',
+                              _data?.localAqi.toStringAsFixed(0) ?? dataNotAvailable,
+                              _data?.universalAqi.toStringAsFixed(0) ?? dataNotAvailable,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Original Health Recommendations widget
+                    HealthRecommendationsWidget(
+                      recommendations: _data?.healthRecommendations,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _buildAQICard(String gifUrl, String localAqi, String universalAqi) {
+  // Convert AQI strings to double safely
+  double safeLocalAqi = _parseAQI(localAqi);
+  double safeUniversalAqi = _parseAQI(universalAqi);
+  
+  // Get appropriate emoji based on AQI value
+  String emojiForAQI = _getEmojiForAQI(safeLocalAqi);
+
+  return Container(
+    padding: const EdgeInsets.all(24), // Increased padding
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: _getAQIGradient(safeLocalAqi),
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      borderRadius: BorderRadius.circular(20), // Slightly larger radius
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.3),
+          blurRadius: 12, // Increased blur for more prominence
+          offset: Offset(3, 6), // Increased offset for deeper shadow
+        ),
+      ],
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // GIF on the left - larger size
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16), // Larger rounded corners
+          child: Image.asset(
+            gifUrl,
+            width: 80, // Increased from 60
+            fit: BoxFit.cover,
+          ),
+        ),
+        const SizedBox(width: 20), // Increased spacing
+
+        // Text stacked vertically in the middle - larger text
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Local AQI: ${localAqi}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 22, // Increased from 18
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 6), // Add spacing between text elements
+              Text(
+                'Universal AQI: ${universalAqi}',
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 20, // Increased from 16
+                ),
+              ),
+              const SizedBox(height: 6), // Add spacing between text elements
+              RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Cigarettes Smoked: ',
+                      style: const TextStyle(
+                        color: Colors.white60,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold, // Made bold
+                      ),
+                    ),
+                    TextSpan(
+                      text: '${_calculateCigarettes(safeLocalAqi)}',
+                      style: const TextStyle(
+                        color: Colors.white60,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold, // Made bold
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
-      ),
-    );
+        
+        // Emoji on the right side
+        Text(
+          emojiForAQI,
+          style: const TextStyle(
+            fontSize: 48, // Large emoji
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+// Helper method to get the appropriate emoji based on AQI value
+String _getEmojiForAQI(double aqi) {
+  if (aqi <= 50) return '😀'; // Good
+  if (aqi <= 100) return '🙂'; // Moderate
+  if (aqi <= 150) return '😐'; // Unhealthy for sensitive groups
+  if (aqi <= 200) return '😷'; // Unhealthy
+  if (aqi <= 300) return '🤢'; // Very unhealthy
+  if (aqi > 300) return '☠️'; // Hazardous
+  return '❓'; // For invalid or unavailable data
+}
+
+  double _parseAQI(String aqiString) {
+    try {
+      return double.parse(aqiString);
+    } catch (e) {
+      return -1; // Return -1 for invalid AQI values
+    }
   }
 
-  Widget _buildAQICard(String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[900],
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              // Icon(icon, color: color, size: 10),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 14,
-                ),
-                overflow: TextOverflow.ellipsis, // Prevents overflow
-                maxLines: 1, // Ensures text doesn't wrap
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-            ),
-            overflow: TextOverflow.ellipsis, // Prevents overflow
-            maxLines: 1, // Ensures text doesn't wrap
-          ),
-        ],
-      ),
-    );
-  }
+  List<Color> _getAQIGradient(double aqi) {
+  if (aqi <= 50) return [Colors.green.shade700, Colors.green.shade400]; // Good
+  if (aqi <= 100) return [Colors.yellow.shade800, Colors.yellow.shade500]; // Moderate
+  if (aqi <= 150) return [Colors.orange.shade800, Colors.orange.shade500]; // Unhealthy for sensitive groups
+  if (aqi <= 200) return [Colors.red.shade800, Colors.red.shade500]; // Unhealthy
+  if (aqi <= 300) return [Colors.purple.shade800, Colors.purple.shade500]; // Very unhealthy
+  return [Colors.brown.shade800, Colors.brown.shade500]; // Hazardous
+}
 
   Color _getAQIColor(double aqi) {
     if (aqi <= 50) return Colors.green;

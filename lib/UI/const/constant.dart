@@ -16,3 +16,5 @@ const gradientEnd = Color(0xFF00D0C3);
 
 const defaultPadding = 20.0;
 const borderRadius = 15.0;
+
+const dataNotAvailable = 'Data not available';
