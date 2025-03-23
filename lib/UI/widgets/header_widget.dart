@@ -7,28 +7,6 @@ class HeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-    //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //   children: [
-    //     Text(
-    //       'AQ Around I',
-    //       style: TextStyle(
-    //         fontSize: 24,
-    //         fontWeight: FontWeight.bold,
-    //         color: Colors.white,
-    //       ),
-    //     ),
-    //     Row(
-    //       children: [
-    //         IconButton(
-    //           onPressed: () {},
-    //           icon: Icon(
-    //             Icons.notifications_outlined,
-    //             color: Colors.white,
-    //           ),
-    //         ),
-    //       ],
-    //     ),
-    //   ],
     );
   }
 }

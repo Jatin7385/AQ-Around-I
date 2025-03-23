@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fitness_dashboard_ui/UI/const/constant.dart';
 import 'package:fitness_dashboard_ui/UI/model/air_quality_model.dart';
@@ -22,6 +23,7 @@ class AQISummaryWidget extends StatefulWidget {
 class _AQISummaryWidgetState extends State<AQISummaryWidget> {
   late AirQualityData? _data;
   String _totalCigarettes = '0.0';
+  String _lastRefreshed = "Fetching..."; // Default message
 
   @override
   void initState() {
@@ -31,6 +33,10 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
     _data = widget.locationService.airQualityData;
     _updateData();
     widget.locationService.addListener(_updateData);
+    
+    // Check location permission and fetch AQI data on app load
+    checkLocationAndFetch();
+    
     print('aqi_summary_widget :: initState end');
   }
 
@@ -41,6 +47,26 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
     super.dispose();
     print('aqi_summary_widget :: dispose end');
   }
+
+  Future<void> getPlaceName(double lat, double lng) async {
+  String locationName = 'Current Location';
+  try {
+    List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
+    if (placemarks.isNotEmpty) {
+      Placemark place = placemarks[0];
+      locationName = '${place.name}, ${place.locality}, ${place.country}';
+      print("📍 Location: ${place.name}, ${place.locality}, ${place.country}");
+    } else {
+      print("❌ No place found.");
+    }
+  } catch (e) {
+    print("❌ Error: $e");
+  } finally {
+    // ✅ Fetch AQI Data
+      await widget.locationService.updateLocation(lat, lng, locationName);
+      _updateData();
+  }
+}
 
   Future<void> checkLocationAndFetch() async {
     bool serviceEnabled;
@@ -71,8 +97,16 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
 
     // ✅ Get Current Location
     Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+        desiredAccuracy: LocationAccuracy.high);    
     print("📍 Location: ${position.latitude}, ${position.longitude}");
+  
+    getPlaceName(position.latitude, position.longitude);
+  
+  }
+
+  String _getCurrentTime() {
+  final now = DateTime.now();
+  return "${now.hour}:${now.minute.toString().padLeft(2, '0')} ${now.hour >= 12 ? 'PM' : 'AM'}";
 }
 
   void _updateData() {
@@ -81,6 +115,7 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
     setState(() {
       _data = widget.locationService.airQualityData;
       _totalCigarettes = _calculateCigarettes(_data?.localAqi ?? -1); //  Let's for now consider, that if the value is null, we'll pick it up as a -1.
+      _lastRefreshed = _getCurrentTime(); // Update timestamp
     });
     print('aqi_summary_widget :: _data : ${_data} :: _totalCigarettes : ${_totalCigarettes}');
     print('aqi_summary_widget :: _updateData end');
@@ -100,7 +135,7 @@ Widget build(BuildContext context) {
     child: SingleChildScrollView(
       child: Padding(
         // Reduce side padding to allow more space
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(0),
         child: Column(
           children: [
             // Improved parent container with more breathing room
@@ -282,6 +317,7 @@ Widget _buildAQICard(String gifUrl, String localAqi, String universalAqi) {
   );
 }
 
+
 Widget _buildAQITextInfo(String localAqi, String universalAqi, double safeLocalAqi) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,6 +359,26 @@ Widget _buildAQITextInfo(String localAqi, String universalAqi, double safeLocalA
               ),
             ),
           ],
+        ),
+      ),
+      const SizedBox(height: 10),
+      // Add Last Refreshed Time
+      Text(
+        'Last Refreshed: $_lastRefreshed',
+        style: TextStyle(
+          color: Colors.white38,
+          fontSize: 14,
+          fontStyle: FontStyle.italic,
+        ),
+      ),
+      const SizedBox(height: 10),
+      // Add Last Refreshed Time
+      Text(
+        'Location Name: ${widget.locationService.locationName}',
+        style: TextStyle(
+          color: Colors.white38,
+          fontSize: 14,
+          fontStyle: FontStyle.italic,
         ),
       ),
     ],

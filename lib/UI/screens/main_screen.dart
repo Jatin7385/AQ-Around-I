@@ -1,9 +1,5 @@
 import 'package:fitness_dashboard_ui/UI/util/responsive.dart';
 import 'package:fitness_dashboard_ui/UI/widgets/dashboard_widget.dart';
-import 'package:fitness_dashboard_ui/UI/widgets/side_menu_widget.dart';
-import 'package:fitness_dashboard_ui/UI/widgets/summary_widget.dart';
-import 'package:fitness_dashboard_ui/UI/widgets/bottom_navigation_widget.dart';
-import 'package:fitness_dashboard_ui/UI/screens/bookmarks_page.dart';
 import 'package:fitness_dashboard_ui/UI/const/constant.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
@@ -21,7 +17,6 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   // List of screens to navigate between
   final List<Widget> _screens = [
     const DashboardWidget(),
-    const BookmarksScreen(),
     // Add other screens as needed
   ];
 
@@ -85,19 +80,6 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
               elevation: 0,
               title: Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: primaryColor.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.favorite,
-                      color: primaryColor,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
                   const Text(
                     'AQ Around I',
                     style: TextStyle(
@@ -107,24 +89,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                   ),
                 ],
               ),
-              actions: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.person,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {},
-                ),
-              ],
             )
-          : null,
-        
-        // Side menu for desktop
-        drawer: !isDesktop ? const SideMenuWidget() : null,
-        
-        // Bottom navigation for mobile
-        bottomNavigationBar: !isDesktop 
-          ? BottomNavigationWidget(onItemSelected: _onItemSelected) 
           : null,
         
         // Main body
@@ -132,17 +97,13 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Side menu for desktop
-              if (isDesktop) 
-                const SideMenuWidget(),
-              
               // Main content
               Expanded(
                 flex: 7,
                 child: Container(
                   padding: EdgeInsets.symmetric(
                     vertical: isDesktop ? 30 : 16,
-                    horizontal: isDesktop ? 30 : 16,
+                    horizontal: isDesktop ? 30 : 5,
                   ),
                   decoration: BoxDecoration(
                     color: backgroundColor,
@@ -150,16 +111,6 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                   child: _screens[_selectedIndex],
                 ),
               ),
-              
-              // Summary widget for desktop
-              if (isDesktop)
-                Expanded(
-                  flex: 3,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 30),
-                    child: const SummaryWidget(),
-                  ),
-                ),
             ],
           ),
         ),

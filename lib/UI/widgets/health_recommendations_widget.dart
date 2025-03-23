@@ -213,38 +213,50 @@ Widget build(BuildContext context) {
     final text = content ?? 'Data not available';
     final Color categoryColor = _getCategoryColor(index);
     
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, color: categoryColor, size: 18),
-            SizedBox(width: 8),
-            Text(
-              title,
-              style: TextStyle(
-                color: categoryColor,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+    return SizedBox(
+      height: double.infinity, // Ensures it takes available space
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: categoryColor, size: 18),
+              SizedBox(width: 8),
+              Expanded( // ✅ Ensures title does not overflow
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: categoryColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  softWrap: true,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
-          ],
-        ),
-        Divider(color: categoryColor.withOpacity(0.3), height: 24),
-        Expanded(
-          child: SingleChildScrollView(
-            physics: BouncingScrollPhysics(),
-            child: Text(
-              text,
-              style: TextStyle(
-                color: Colors.grey[300],
-                fontSize: 15,
-                height: 1.6,
+            ],
+          ),
+          Divider(color: categoryColor.withOpacity(0.3), height: 24),
+
+          // ✅ Wrap in Expanded or Flexible to prevent overflow
+          Expanded(
+            child: SingleChildScrollView(
+              physics: BouncingScrollPhysics(),
+              child: Text(
+                text,
+                style: TextStyle(
+                  color: Colors.grey[300],
+                  fontSize: 15,
+                  height: 1.6,
+                ),
               ),
             ),
           ),
-        ),
-      ],
-    );
+        ],
+      ),
+      );
+
+
   }
 }
