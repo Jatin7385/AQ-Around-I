@@ -145,7 +145,11 @@ class AirQualityService {
           'latitude': latitude,
           'longitude': longitude,
         },
-        'extraComputations': ['LOCAL_AQI', 'HEALTH_RECOMMENDATIONS'],
+        'extraComputations': ['HEALTH_RECOMMENDATIONS',
+              'DOMINANT_POLLUTANT_CONCENTRATION',
+              'POLLUTANT_CONCENTRATION',
+              'LOCAL_AQI',
+              'POLLUTANT_ADDITIONAL_INFO'],
       };
 
       developer.log('📤 Making request to Air Quality API\nURL: $url\nBody: ${json.encode(requestBody)}', name: 'air.quality.debug');
@@ -167,35 +171,73 @@ class AirQualityService {
 
         final indexes = data['indexes'] ?? [];
         if (indexes.isNotEmpty) {
-          final mainIndex = indexes[0];
-          final aqi = mainIndex['aqi']?.toDouble() ?? 0;
-          final category = mainIndex['category'] ?? 'Unknown';
-          final dominantPollutant = mainIndex['dominantPollutant'] ?? 'Unknown';
+          double? localAqi;
+          double? universalAqi;
+          String category = 'Unknown';
+          String dominantPollutant = 'Unknown';
 
-          developer.log('📊 Extracted AQI: $aqi', name: 'air.quality.debug');
+          // Find Universal AQI
+          final universalIndex = indexes.firstWhere(
+            (index) => index['code'] == 'uaqi',
+            orElse: () => {},
+          );
+          if (universalIndex.isNotEmpty) {
+            universalAqi = double.tryParse(universalIndex['aqiDisplay'] ?? '0');
+            category = universalIndex['category'] ?? 'Unknown';
+            dominantPollutant = universalIndex['dominantPollutant'] ?? 'Unknown';
+          }
+
+          // Find Local AQI (NAQI for India)
+          final localIndex = indexes.firstWhere(
+            (index) => index['code'] != 'uaqi',
+            orElse: () => {},
+          );
+          if (localIndex.isNotEmpty) {
+            localAqi = double.tryParse(localIndex['aqiDisplay'] ?? '0');
+          }
+
+          developer.log('📊 Extracted Universal AQI: $universalAqi', name: 'air.quality.debug');
+          developer.log('📊 Extracted Local AQI: $localAqi', name: 'air.quality.debug');
           developer.log('🏷️ Category: $category', name: 'air.quality.debug');
           developer.log('⚠️ Dominant Pollutant: $dominantPollutant', name: 'air.quality.debug');
 
           Map<String, PollutantData> pollutants = {};
-          final pollutantsData = data['pollutants'] ?? {};
-          pollutantsData.forEach((key, value) {
-            pollutants[key] = PollutantData(
-              displayName: value['displayName'] ?? key.toUpperCase(),
-              fullName: value['fullName'] ?? _getPollutantFullName(key),
-              concentration: value['concentration']?.toDouble() ?? 0.0,
-              units: value['units'] ?? _getPollutantUnits(key),
+          final pollutantsData = data['pollutants'] ?? [];
+          for (var pollutant in pollutantsData) {
+            final code = pollutant['code'] ?? '';
+            final concentration = pollutant['concentration'] ?? {};
+            pollutants[code] = PollutantData(
+              displayName: pollutant['displayName'] ?? code.toUpperCase(),
+              fullName: pollutant['fullName'] ?? _getPollutantFullName(code),
+              concentration: concentration['value']?.toDouble() ?? 0.0,
+              units: concentration['units'] ?? _getPollutantUnits(code),
+              sources: pollutant['additionalInfo']?['sources'] ?? '',
+              effects: pollutant['additionalInfo']?['effects'] ?? '',
             );
-          });
+          }
+
+          // Extract health recommendations
+          final healthRecommendations = HealthRecommendations(
+            generalPopulation: data['healthRecommendations']?['generalPopulation']?.toString() ?? 'No recommendations available',
+            elderly: data['healthRecommendations']?['elderly']?.toString() ?? 'No recommendations available',
+            lungDiseasePopulation: data['healthRecommendations']?['lungDiseasePopulation']?.toString() ?? 'No recommendations available',
+            heartDiseasePopulation: data['healthRecommendations']?['heartDiseasePopulation']?.toString() ?? 'No recommendations available',
+            athletes: data['healthRecommendations']?['athletes']?.toString() ?? 'No recommendations available',
+            pregnantWomen: data['healthRecommendations']?['pregnantWomen']?.toString() ?? 'No recommendations available',
+            children: data['healthRecommendations']?['children']?.toString() ?? 'No recommendations available',
+          );
 
           developer.log('📈 Extracted pollutants: ${pollutants.keys.join(", ")}', name: 'air.quality.debug');
 
           return AirQualityData(
-            aqi: aqi,
+            localAqi: localAqi ?? 0,
+            universalAqi: universalAqi ?? 0,
             category: category,
             dominantPollutant: dominantPollutant,
             pollutants: pollutants,
             timestamp: DateTime.now(),
             locationName: locationName,
+            healthRecommendations: healthRecommendations,
           );
         }
       }
@@ -205,12 +247,22 @@ class AirQualityService {
     } catch (e, stackTrace) {
       developer.log('❌ Exception in getAirQuality', name: 'air.quality.error', error: e, stackTrace: stackTrace);
       return AirQualityData(
-        aqi: 0,
+        localAqi: 0,
+        universalAqi: 0,
         category: 'Error',
         dominantPollutant: 'N/A',
         pollutants: {},
         timestamp: DateTime.now(),
         locationName: 'Error loading data',
+        healthRecommendations: HealthRecommendations(
+          generalPopulation: 'Unable to load recommendations',
+          elderly: 'Unable to load recommendations',
+          lungDiseasePopulation: 'Unable to load recommendations',
+          heartDiseasePopulation: 'Unable to load recommendations',
+          athletes: 'Unable to load recommendations',
+          pregnantWomen: 'Unable to load recommendations',
+          children: 'Unable to load recommendations',
+        ),
       );
     }
   }

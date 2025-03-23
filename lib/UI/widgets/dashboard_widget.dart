@@ -23,20 +23,25 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
   @override
   void initState() {
+    print('dashboard_widget :: initState start');
     super.initState();
+    print('dashboard_widget :: initState end');
     developer.log('DashboardWidget initialized', name: 'dashboard.widget');
   }
 
   void _onLocationSelected(double lat, double lng, String locationName) {
+    print('dashboard_widget :: _onLocationSelected start');
     developer.log('Location selected: $locationName ($lat, $lng)', name: 'dashboard.location');
     _locationService.updateLocation(lat, lng, locationName);
     setState(() {
       _showLocationSearch = false;
     });
+    print('dashboard_widget :: _onLocationSelected end');
   }
 
   @override
   Widget build(BuildContext context) {
+    print('dashboard_widget :: build start');
     final isDesktop = Responsive.isDesktop(context);
     final isTablet = Responsive.isTablet(context);
     
@@ -126,66 +131,8 @@ class _DashboardWidgetState extends State<DashboardWidget> {
             ),
             
             // Air Quality Widgets
-            if (isDesktop || isTablet)
-              // For desktop and tablet: side by side
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: AQISummaryWidget(locationService: _locationService),
-                  ),
-                  const SizedBox(width: 18),
-                  Expanded(
-                    flex: 1,
-                    child: AirQualityDetailsWidget(locationService: _locationService),
-                  ),
-                ],
-              )
-            else
-              // For mobile: stacked
-              Column(
-                children: [
-                  AQISummaryWidget(locationService: _locationService),
-                  const SizedBox(height: 18),
-                  AirQualityDetailsWidget(locationService: _locationService),
-                ],
-              ),
+            AQISummaryWidget(locationService: _locationService),
             
-            const SizedBox(height: 18),
-            
-            // Cigarette Summary
-            const CigaretteSummaryWidget(
-              totalCigarettes: 120,
-              healthRisk: 45.5,
-            ),
-            
-            const SizedBox(height: 18),
-            
-            // Activity Tracking
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.directions_walk,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Activity Tracking',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            const LineChartCard(),
             const SizedBox(height: 18),
           ],
         ),

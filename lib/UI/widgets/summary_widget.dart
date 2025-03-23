@@ -1,9 +1,5 @@
 import 'package:fitness_dashboard_ui/UI/const/constant.dart';
-import 'package:fitness_dashboard_ui/UI/widgets/pie_chart_widget.dart';
-import 'package:fitness_dashboard_ui/UI/widgets/scheduled_widget.dart';
-import 'package:fitness_dashboard_ui/UI/widgets/summary_details.dart';
 import 'package:flutter/material.dart';
-import 'package:fitness_dashboard_ui/UI/widgets/custom_card_widget.dart';
 
 class SummaryWidget extends StatelessWidget {
   const SummaryWidget({super.key});
@@ -14,176 +10,208 @@ class SummaryWidget extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: cardBackgroundColor,
-        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(-2, 0),
+          ),
+        ],
       ),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Text(
+            'Daily Summary',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Stats Grid
+          GridView.count(
+            shrinkWrap: true,
+            crossAxisCount: 2,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            childAspectRatio: 1.2,
+            children: [
+              _buildStatCard(
+                icon: Icons.air,
+                title: 'AQI',
+                value: '156',
+                color: Colors.orange,
+              ),
+              _buildStatCard(
+                icon: Icons.thermostat,
+                title: 'Temperature',
+                value: '24°C',
+                color: Colors.blue,
+              ),
+              _buildStatCard(
+                icon: Icons.water_drop,
+                title: 'Humidity',
+                value: '65%',
+                color: Colors.green,
+              ),
+              _buildStatCard(
+                icon: Icons.wind_power,
+                title: 'Wind',
+                value: '12 km/h',
+                color: Colors.purple,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          // Recent Locations
+          Text(
+            'Recent Locations',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          // Location List
+          Expanded(
+            child: ListView(
+              children: [
+                _buildLocationItem(
+                  'Home',
+                  'Sector 12, Delhi',
+                  Icons.home,
+                  Colors.blue,
+                ),
+                _buildLocationItem(
+                  'Office',
+                  'Sector 18, Noida',
+                  Icons.work,
+                  Colors.orange,
+                ),
+                _buildLocationItem(
+                  'Park',
+                  'Central Park, Delhi',
+                  Icons.park,
+                  Colors.green,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard({
+    required IconData icon,
+    required String title,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            color: color,
+            size: 24,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(
+              color: Colors.grey[400],
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationItem(
+    String name,
+    String address,
+    IconData icon,
+    Color color,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey[850]?.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Health Summary',
+                  name,
                   style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
                     color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.notifications_none,
-                    color: primaryColor,
-                    size: 20,
-                  ),
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: 24),
-            
-            // User profile
-            Row(
-              children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [gradientStart, gradientEnd],
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'JD',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'John Doe',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: successColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'Premium Member',
-                          style: TextStyle(
-                            color: successColor,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: 32),
-            
-            // Chart
-            Chart(),
-            
-            const SizedBox(height: 16),
-            
-            // Summary title with icon
-            Row(
-              children: [
-                Icon(
-                  Icons.insights,
-                  color: primaryColor,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
+                const SizedBox(height: 4),
                 Text(
-                  'Summary',
+                  address,
                   style: TextStyle(
-                    fontSize: 16, 
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: Colors.grey[400],
+                    fontSize: 12,
                   ),
                 ),
               ],
             ),
-            
-            const SizedBox(height: 16),
-            
-            // Summary details
-            SummaryDetails(),
-            
-            const SizedBox(height: 32),
-            
-            // Scheduled title with icon
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.calendar_today,
-                      color: primaryColor,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Upcoming',
-                      style: TextStyle(
-                        fontSize: 16, 
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    'View All',
-                    style: TextStyle(
-                      color: primaryColor,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.grey[600],
+              size: 16,
             ),
-            
-            const SizedBox(height: 16),
-            
-            // Scheduled items
-            Scheduled(),
-          ],
-        ),
+            onPressed: () {},
+          ),
+        ],
       ),
     );
   }

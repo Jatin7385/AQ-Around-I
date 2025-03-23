@@ -27,10 +27,12 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    print('main_screen :: initState start');
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     developer.log('MainScreen initialized', name: 'screen.lifecycle');
     _initializeScreen();
+    print('main_screen :: initState end');
   }
 
   Future<void> _initializeScreen() async {
@@ -68,12 +70,14 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     try {
       developer.log('Building MainScreen', name: 'screen.lifecycle');
+      print('main_screen :: build start');
       final isDesktop = Responsive.isDesktop(context);
       final isMobile = Responsive.isMobile(context);
       developer.log('Device type: ${isDesktop ? "Desktop" : isMobile ? "Mobile" : "Tablet"}', 
           name: 'screen.layout');
 
       return Scaffold(
+        backgroundColor: backgroundColor,
         // Add a modern app bar for mobile
         appBar: isMobile 
           ? AppBar(
@@ -94,8 +98,8 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    'Health Dashboard',
+                  const Text(
+                    'AQ Around I',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -105,7 +109,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
               ),
               actions: [
                 IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.person,
                     color: Colors.white,
                   ),
@@ -116,59 +120,47 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           : null,
         
         // Side menu for desktop
-        drawer: isDesktop ? null : SideMenuWidget(),
+        drawer: !isDesktop ? const SideMenuWidget() : null,
         
         // Bottom navigation for mobile
         bottomNavigationBar: !isDesktop 
           ? BottomNavigationWidget(onItemSelected: _onItemSelected) 
           : null,
         
-        // End drawer for mobile
-        endDrawer: isMobile
-            ? SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8,
-                child: const SummaryWidget(),
-              )
-            : null,
-        
         // Main body
         body: SafeArea(
-          child: ErrorBoundary(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Side menu for desktop
-                if (isDesktop) 
-                  SideMenuWidget(),
-                
-                // Main content
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Side menu for desktop
+              if (isDesktop) 
+                const SideMenuWidget(),
+              
+              // Main content
+              Expanded(
+                flex: 7,
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    vertical: isDesktop ? 30 : 16,
+                    horizontal: isDesktop ? 30 : 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                  ),
+                  child: _screens[_selectedIndex],
+                ),
+              ),
+              
+              // Summary widget for desktop
+              if (isDesktop)
                 Expanded(
-                  flex: 7,
+                  flex: 3,
                   child: Container(
-                    padding: EdgeInsets.symmetric(
-                      vertical: isDesktop ? 30 : 16,
-                      horizontal: isDesktop ? 30 : 16,
-                    ),
-                    decoration: BoxDecoration(
-                      color: backgroundColor,
-                    ),
-                    child: _screens[_selectedIndex],
+                    padding: const EdgeInsets.symmetric(vertical: 30),
+                    child: const SummaryWidget(),
                   ),
                 ),
-                
-                // Summary widget for desktop
-                if (isDesktop)
-                  Expanded(
-                    flex: 3,
-                    child: Container(
-                      constraints: BoxConstraints(
-                        maxHeight: MediaQuery.of(context).size.height - 60, // Account for padding
-                      ),
-                      child: SummaryWidget(),
-                    ),
-                  ),
-              ],
-            ),
+            ],
           ),
         ),
       );
@@ -178,6 +170,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           error: e,
           stackTrace: stackTrace);
       return Scaffold(
+        backgroundColor: backgroundColor,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -200,69 +193,5 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
         ),
       );
     }
-  }
-}
-
-class ErrorBoundary extends StatefulWidget {
-  final Widget child;
-
-  const ErrorBoundary({super.key, required this.child});
-
-  @override
-  State<ErrorBoundary> createState() => _ErrorBoundaryState();
-}
-
-class _ErrorBoundaryState extends State<ErrorBoundary> {
-  bool hasError = false;
-
-  @override
-  void initState() {
-    super.initState();
-    developer.log('ErrorBoundary initialized', name: 'error.boundary');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (hasError) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, color: Colors.red, size: 48),
-              const SizedBox(height: 16),
-              const Text(
-                'An error occurred in the application.\nPlease try again.',
-                style: TextStyle(color: Colors.white, fontSize: 16),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    hasError = false;
-                  });
-                },
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return widget.child;
-  }
-
-  @override
-  void didCatchError(Object error, StackTrace stackTrace) {
-    developer.log('ErrorBoundary caught error',
-        name: 'error.boundary',
-        error: error,
-        stackTrace: stackTrace);
-    setState(() {
-      hasError = true;
-    });
   }
 }

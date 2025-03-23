@@ -3,280 +3,172 @@ import 'package:fitness_dashboard_ui/UI/data/side_menu_data.dart';
 import 'package:flutter/material.dart';
 
 class SideMenuWidget extends StatefulWidget {
-  final Function(int)? onItemSelected;
-
-  const SideMenuWidget({
-    super.key,
-    this.onItemSelected,
-  });
+  const SideMenuWidget({super.key});
 
   @override
   State<SideMenuWidget> createState() => _SideMenuWidgetState();
 }
 
 class _SideMenuWidgetState extends State<SideMenuWidget> {
-  int selectedIndex = 0;
-  final data = SideMenuData();
+  int _selectedIndex = 0;
+  final SideMenuData _menuData = SideMenuData();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 220,
-      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 16),
+      width: 250,
       decoration: BoxDecoration(
         color: cardBackgroundColor,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
             blurRadius: 10,
-            offset: const Offset(5, 0),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // App logo and name
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
+          // Logo and App Name
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [gradientStart, gradientEnd],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
+                    color: primaryColor.withOpacity(0.1),
+                    shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.favorite,
-                    color: Colors.white,
-                    size: 20,
+                    color: primaryColor,
+                    size: 24,
                   ),
                 ),
                 const SizedBox(width: 12),
                 const Text(
-                  'HealthTrack',
+                  'Health Dashboard',
                   style: TextStyle(
+                    color: Colors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
                   ),
                 ),
               ],
             ),
           ),
-          
-          const SizedBox(height: 16),
-          
-          // Menu category
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Text(
-              'MENU',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[500],
-                letterSpacing: 1.2,
-              ),
-            ),
-          ),
-          
-          // Menu items
+
+          // Menu Items
           Expanded(
             child: ListView.builder(
-              itemCount: data.menu.length,
-              itemBuilder: (context, index) => buildMenuEntry(data, index),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              itemCount: _menuData.menu.length,
+              itemBuilder: (context, index) {
+                final menuItem = _menuData.menu[index];
+                final isSelected = index == _selectedIndex;
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = index;
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? selectionColor.withOpacity(0.1)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              menuItem.icon,
+                              color: isSelected
+                                  ? selectionColor
+                                  : Colors.grey.withOpacity(0.8),
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              menuItem.title,
+                              style: TextStyle(
+                                color: isSelected
+                                    ? selectionColor
+                                    : Colors.grey.withOpacity(0.8),
+                                fontSize: 14,
+                                fontWeight:
+                                    isSelected ? FontWeight.w600 : FontWeight.normal,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
-          
-          // Divider
-          Divider(
-            color: Colors.grey.withOpacity(0.2),
-            thickness: 1,
-          ),
-          
-          // Settings and logout
-          buildMenuOption(
-            icon: Icons.settings,
-            title: 'Settings',
-            onTap: () {},
-          ),
-          buildMenuOption(
-            icon: Icons.logout,
-            title: 'Logout',
-            onTap: () {},
-            color: dangerColor.withOpacity(0.8),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // Help card
+
+          // User Profile
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [gradientStart, gradientEnd],
-              ),
-              borderRadius: BorderRadius.circular(borderRadius),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                const Icon(
-                  Icons.headset_mic,
-                  color: Colors.white,
-                  size: 24,
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Need Help?',
-                  style: TextStyle(
+                const CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.grey,
+                  child: Icon(
+                    Icons.person,
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
                   ),
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Contact our support team',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Contact Us',
+                      const Text(
+                        'User Name',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 12,
+                          fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      SizedBox(width: 4),
-                      Icon(
-                        Icons.arrow_forward,
-                        color: Colors.white,
-                        size: 12,
+                      Text(
+                        'View Profile',
+                        style: TextStyle(
+                          color: Colors.grey.withOpacity(0.8),
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.settings,
+                    color: Colors.grey,
+                    size: 20,
+                  ),
+                  onPressed: () {},
                 ),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget buildMenuEntry(SideMenuData data, int index) {
-    final isSelected = selectedIndex == index;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: isSelected ? selectionColor.withOpacity(0.1) : Colors.transparent,
-      ),
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            selectedIndex = index;
-          });
-          if (widget.onItemSelected != null) {
-            widget.onItemSelected!(index);
-          }
-        },
-        borderRadius: BorderRadius.circular(10),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: isSelected ? selectionColor.withOpacity(0.2) : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  data.menu[index].icon,
-                  color: isSelected ? selectionColor : Colors.grey,
-                  size: 18,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                data.menu[index].title,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: isSelected ? Colors.white : Colors.grey,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                ),
-              ),
-              if (isSelected) ...[
-                const Spacer(),
-                Container(
-                  width: 5,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: selectionColor,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-  
-  Widget buildMenuOption({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-    Color? color,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: color ?? Colors.grey,
-              size: 18,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                color: color ?? Colors.grey,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

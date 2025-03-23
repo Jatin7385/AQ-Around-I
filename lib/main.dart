@@ -45,17 +45,25 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     developer.log('Building MyApp widget', name: 'app.lifecycle');
     return MaterialApp(
-      title: 'Dashboard UI',
+      title: 'AQ Around I',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
+      theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: backgroundColor,
-        brightness: Brightness.dark,
+        primaryColor: primaryColor,
+        cardColor: cardBackgroundColor,
+        colorScheme: ColorScheme.dark(
+          primary: primaryColor,
+          secondary: secondaryColor,
+          surface: cardBackgroundColor,
+          background: backgroundColor,
+        ),
+        textTheme: TextTheme(
+          bodyLarge: TextStyle(color: Colors.grey[300]),
+          bodyMedium: TextStyle(color: Colors.grey[400]),
+          titleLarge: const TextStyle(color: Colors.white),
+          titleMedium: const TextStyle(color: Colors.white),
+        ),
       ),
-      builder: (context, child) {
-        return ErrorBoundary(
-          child: child ?? const SizedBox(),
-        );
-      },
       home: const MainScreen(),
     );
   }

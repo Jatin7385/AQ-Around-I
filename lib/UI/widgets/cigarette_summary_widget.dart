@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:fitness_dashboard_ui/UI/widgets/custom_card_widget.dart';
 import 'package:fitness_dashboard_ui/UI/const/constant.dart';
+import 'package:fitness_dashboard_ui/UI/services/location_service.dart';
 import 'package:fitness_dashboard_ui/UI/widgets/pollutant_details_popup.dart';
 
 class CigaretteSummaryWidget extends StatelessWidget {
-  final int totalCigarettes;
-  final double healthRisk;
-
+  final LocationService locationService;
+  final String localAqi = 'Unable to retrieve data.';
+  final String universalAqi = 'Unable to retrieve data.';
+  final String totalCigarettes = 'Unable to retrieve data.';
+  final String healthRisk = 'Unable to retrieve data.';
+  
   const CigaretteSummaryWidget({
     super.key,
-    required this.totalCigarettes,
-    required this.healthRisk,
+    required this.locationService,
   });
 
   @override
@@ -20,7 +23,9 @@ class CigaretteSummaryWidget extends StatelessWidget {
         showDialog(
           context: context,
           builder: (BuildContext context) {
-            return PollutantDetailsPopup();
+            return PollutantDetailsPopup(
+              pollutants: {},  // Since this widget doesn't have access to pollutants, pass empty map
+            );
           },
         );
       },
@@ -39,7 +44,7 @@ class CigaretteSummaryWidget extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Monthly Cigarette Summary',
+                  'Cigarette Summary',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -107,7 +112,7 @@ class CigaretteSummaryWidget extends StatelessWidget {
                       // Cigarettes per Month
                       _buildStatItem(
                         icon: Icons.smoking_rooms,
-                        title: 'Cigarettes per Month',
+                        title: 'Cigarettes',
                         value: '$totalCigarettes',
                         valueColor: primaryColor,
                       ),
@@ -117,8 +122,17 @@ class CigaretteSummaryWidget extends StatelessWidget {
                       // Health Risk
                       _buildStatItem(
                         icon: Icons.health_and_safety,
-                        title: 'Health Risk',
-                        value: '${healthRisk.toStringAsFixed(1)}%',
+                        title: 'Local AQI',
+                        value: '$localAqi',
+                        valueColor: dangerColor,
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      _buildStatItem(
+                        icon: Icons.health_and_safety,
+                        title: 'Universal AQI',
+                        value: '$universalAqi',
                         valueColor: dangerColor,
                       ),
                       

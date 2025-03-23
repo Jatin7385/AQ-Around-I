@@ -283,7 +283,12 @@ class _AirQualityDetailsWidgetState extends State<AirQualityDetailsWidget> {
     );
   }
 
-  Widget _buildPollutantsData(AirQualityData data) {
+  Widget _buildPollutantsData(AirQualityData? data) {
+    if (data == null) {
+      return const Center(
+        child: Text('No pollutants data available'),
+      );
+    }
     final pollutants = data.pollutants;
     final formattedTime = DateFormat('MMM d, h:mm a').format(data.timestamp);
     

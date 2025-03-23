@@ -226,12 +226,14 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
             final airQualityData = await AirQualityService.getAirQuality(lat, lng);
             print('Returned from getAirQuality service');
             print('🌍 Air Quality Data for $address:');
-            print('📊 AQI: ${airQualityData.aqi}');
+            print('📊 Local AQI: ${airQualityData.localAqi}');
+            print('📊 Universal AQI: ${airQualityData.universalAqi}');
             print('🏷️ Category: ${airQualityData.category}');
             print('⚠️ Dominant Pollutant: ${airQualityData.dominantPollutant}');
             print('📈 Pollutants: ${airQualityData.pollutants.keys.join(", ")}');
             developer.log('🌍 Air Quality Data for $address:', name: 'air.quality');
-            developer.log('📊 AQI: ${airQualityData.aqi}', name: 'air.quality');
+            developer.log('📊 Local AQI: ${airQualityData.localAqi}', name: 'air.quality');
+            developer.log('📊 Universal AQI: ${airQualityData.universalAqi}', name: 'air.quality');
             developer.log('🏷️ Category: ${airQualityData.category}', name: 'air.quality');
             developer.log('⚠️ Dominant Pollutant: ${airQualityData.dominantPollutant}', name: 'air.quality');
             developer.log('📈 Pollutants: ${airQualityData.pollutants.keys.join(", ")}', name: 'air.quality');

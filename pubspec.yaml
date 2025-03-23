@@ -16,9 +16,12 @@ dependencies:
   fl_chart: ^0.65.0
   flutter_svg: ^2.0.5
   geolocator: ^10.1.0
+  permission_handler: ^11.0.1
   http: ^1.2.0
   intl: ^0.19.0
   google_maps_flutter: ^2.5.3
+  provider: ^6.1.1
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
@@ -27,10 +30,8 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 
 flutter:
-
   uses-material-design: true
+  
   assets:
     - assets/images/
-    - assets/icons/  
-    - assets/images/cigs_1.gif
-    - assets/images/cigs_2.gif
+    - assets/icons/
