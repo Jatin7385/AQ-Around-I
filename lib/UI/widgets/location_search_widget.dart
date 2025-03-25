@@ -28,61 +28,28 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
   void initState() {
     super.initState();
     developer.log('LocationSearchWidget initialized', name: 'location.widget');
-    
-    // Test API key and logging
-    _testApiKey();
   }
   
-  Future<void> _testApiKey() async {
-    print('🔑 TESTING API KEY: ${ApiConfig.apiKey}');
-    developer.log('Testing API key: ${ApiConfig.apiKey}', name: 'location.test');
-    
-    try {
-      final url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json'
-          '?input=New York'
-          '&key=${ApiConfig.apiKey}'
-          '&types=(cities)';
-          
-      print('🌐 TEST API REQUEST: $url');
-      developer.log('Test API request URL: $url', name: 'location.test');
-      
-      final response = await http.get(Uri.parse(url));
-      
-      print('📊 TEST API RESPONSE STATUS: ${response.statusCode}');
-      developer.log('Test API response status: ${response.statusCode}', name: 'location.test');
-      
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        print('📋 TEST API RESPONSE: ${response.body}');
-        developer.log('Test API response: ${response.body}', name: 'location.test');
-        
-        if (data['status'] == 'OK') {
-          print('✅ API KEY TEST SUCCESSFUL');
-          developer.log('API key test successful', name: 'location.test');
-        } else {
-          print('❌ API KEY TEST FAILED: ${data['status']} - ${data['error_message'] ?? 'Unknown error'}');
-          developer.log('API key test failed: ${data['status']} - ${data['error_message'] ?? 'Unknown error'}', 
-              name: 'location.test.error');
-        }
-      } else {
-        print('❌ API KEY TEST FAILED: Network error ${response.statusCode}');
-        developer.log('API key test failed: Network error ${response.statusCode}', 
-            name: 'location.test.error');
-      }
-    } catch (e, stackTrace) {
-      print('❌ API KEY TEST EXCEPTION: $e');
-      print('STACK TRACE: $stackTrace');
-      developer.log('API key test exception',
-          name: 'location.test.error',
-          error: e,
-          stackTrace: stackTrace);
-    }
-  }
-
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _showPopup(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Hey there!"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _getPlacePredictions(String input) async {
@@ -141,6 +108,7 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
             _isLoading = false;
             _errorMessage = 'Error: ${data['status']} - ${data['error_message'] ?? 'Unknown error'}';
           });
+          _showPopup('We are facing an issue while fetching location predictions. Please try again.');
           
           // Log the API error
           print('❌ API ERROR: ${data['status']} - ${data['error_message'] ?? 'Unknown error'}');
@@ -152,6 +120,7 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
           _isLoading = false;
           _errorMessage = 'Network error: ${response.statusCode}';
         });
+        _showPopup('We are facing an issue while fetching location predictions. Please try again.');
         
         // Log the network error
         print('❌ NETWORK ERROR: ${response.statusCode}');
@@ -161,6 +130,7 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
       // Log any exceptions
       print('❌ EXCEPTION: $e');
       print('STACK TRACE: $stackTrace');
+      _showPopup('We are facing an issue while fetching location predictions. Please try again.');
       developer.log('Error getting place predictions',
           name: 'location.search.error',
           error: e,
@@ -242,6 +212,7 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
                 name: 'air.quality.error',
                 error: e,
                 stackTrace: stackTrace);
+            _showPopup('We are facing an issue while fetching air quality data. Please try again.');
           }
           
           if (!mounted) return;
@@ -252,6 +223,7 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
             _isLoading = false;
             _errorMessage = 'Error: ${data['status']} - ${data['error_message'] ?? 'Unknown error'}';
           });
+          _showPopup('We are facing an issue while fetching air quality data. Please try again.');
           
           // Log the API error
           print('❌ API ERROR: ${data['status']} - ${data['error_message'] ?? 'Unknown error'}');
@@ -264,6 +236,7 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
           _isLoading = false;
           _errorMessage = 'Network error: ${response.statusCode}';
         });
+        _showPopup('We are facing an issue while fetching air quality data. Please try again.');
         
         // Log the network error
         print('❌ NETWORK ERROR: ${response.statusCode}');
@@ -273,6 +246,7 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
       // Log any exceptions
       print('❌ EXCEPTION: $e');
       print('STACK TRACE: $stackTrace');
+      _showPopup('We are facing an issue while fetching air quality data. Please try again.');
       developer.log('Error getting place details',
           name: 'location.details.error',
           error: e,
@@ -344,6 +318,7 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
           _isLoading = false;
           _errorMessage = 'Network error: ${response.statusCode}';
         });
+        _showPopup('We are facing an issue while fetching air quality data. Please try again.');
         
         // Log the network error
         print('❌ NETWORK ERROR: ${response.statusCode}');
@@ -353,6 +328,7 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
       // Log any exceptions
       print('❌ EXCEPTION: $e');
       print('STACK TRACE: $stackTrace');
+      _showPopup('We are facing an issue while fetching air quality data. Please try again.');
       developer.log('Error getting place details',
           name: 'location.details.error',
           error: e,

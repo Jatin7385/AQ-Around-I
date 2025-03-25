@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fitness_dashboard_ui/UI/const/constant.dart';
 import 'package:fitness_dashboard_ui/UI/model/air_quality_model.dart';
@@ -24,6 +25,9 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
   late AirQualityData? _data;
   String _totalCigarettes = '0.0';
   String _lastRefreshed = "Fetching..."; // Default message
+  bool _isLoading = false;
+
+  final Duration interval = Duration(minutes: 10); // 10-minute interval
 
   @override
   void initState() {
@@ -36,6 +40,7 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
     
     // Check location permission and fetch AQI data on app load
     checkLocationAndFetch();
+    Timer.periodic(interval, (_) => checkLocationAndFetch());
     
     print('aqi_summary_widget :: initState end');
   }
@@ -68,40 +73,86 @@ class _AQISummaryWidgetState extends State<AQISummaryWidget> {
   }
 }
 
+  void _showLoading() {
+    setState(() { // Showing the loading icon
+      _isLoading = true;
+    });
+  }
+
+  void _hideLoading() {
+    setState(() { // Hiding the loading icon
+      _isLoading = false;
+    });
+  }
+
+  void _showPopup(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Hey there!"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> checkLocationAndFetch() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+    print('aqi_summary_widget :: checkLocationAndFetch start');
+    String errorMsg = "There's been a technical issue. Kindly close this popup and try manually entering your location.";
+    try{
+      _showLoading();
+      
+      bool serviceEnabled;
+      LocationPermission permission;
 
-    // ✅ Check if location services are enabled
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      print("❌ Location services are disabled.");
-      return;
-    }
-
-    // ✅ Check & Request Permission
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        print("❌ Location permission denied.");
+      // ✅ Check if location services are enabled
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        errorMsg = "❌ Location services are disabled. Kindly enable it in settings or manually select your location";
+        print(errorMsg);
+        _showPopup(errorMsg);
         return;
       }
-    }
 
-    if (permission == LocationPermission.deniedForever) {
-      print("❌ Location permission permanently denied. Please enable it in settings.");
-      openAppSettings(); // Opens app settings for user to enable manually
-      return;
-    }
+      // ✅ Check & Request Permission
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          errorMsg = "❌ Location permission denied. Kindly enable it in settings or manually select your location";
+          print(errorMsg);
+          _showPopup(errorMsg);
+          return;
+        }
+      }
 
-    // ✅ Get Current Location
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);    
-    print("📍 Location: ${position.latitude}, ${position.longitude}");
-  
-    getPlaceName(position.latitude, position.longitude);
-  
+      if (permission == LocationPermission.deniedForever) {
+        errorMsg = "❌ Location permission permanently denied. Kindly enable it in settings or manually select your location";
+        print(errorMsg);
+        _showPopup(errorMsg);
+        return;
+      }
+
+      // ✅ Get Current Location
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);    
+      print("📍 Location: ${position.latitude}, ${position.longitude}");
+    
+      getPlaceName(position.latitude, position.longitude);
+
+    } catch (e) {
+      errorMsg = "❌ Error: $e";
+      print(errorMsg);
+      _showPopup("It seems your device is not able to fetch your location. Kindly close this popup and try manually entering your location.");
+    } finally {
+      _hideLoading();
+      print('aqi_summary_widget :: checkLocationAndFetch end');
+    }
   }
 
   String _getCurrentTime() {
@@ -223,99 +274,120 @@ Widget build(BuildContext context) {
 
 
 Widget _buildAQICard(String gifUrl, String localAqi, String universalAqi) {
-  // Convert AQI strings to double safely
   double safeLocalAqi = _parseAQI(localAqi);
   double safeUniversalAqi = _parseAQI(universalAqi);
-  
-  // Get appropriate emoji based on AQI value
   String emojiForAQI = _getEmojiForAQI(safeLocalAqi);
 
-  return Container(
-    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: _getAQIGradient(safeLocalAqi),
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      borderRadius: BorderRadius.circular(20),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.3),
-          blurRadius: 12,
-          offset: Offset(3, 6),
+  return Stack(
+    children: [
+      // Show loading indicator if `_isLoading` is true
+      if (_isLoading)
+        Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+            ),
+          ),
         ),
-      ],
-    ),
-    child: LayoutBuilder(
-      builder: (context, constraints) {
-        final isSmallScreen = constraints.maxWidth < 340;
-        
-        // Use Column for very small screens, Row for larger screens
-        return isSmallScreen 
-            ? Column(
-                children: [
-                  // GIF centered
-                  Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.asset(
-                        gifUrl,
-                        width: 60,
-                        fit: BoxFit.cover,
+
+      // AQI Card
+      Container(
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: _getAQIGradient(safeLocalAqi),
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 12,
+              offset: Offset(3, 6),
+            ),
+          ],
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isSmallScreen = constraints.maxWidth < 340;
+
+            return isSmallScreen
+                ? Column(
+                    children: [
+                      Center(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.asset(
+                            gifUrl,
+                            width: 60,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Text info
-                  _buildAQITextInfo(localAqi, universalAqi, safeLocalAqi),
-                  
-                  const SizedBox(height: 12),
-                  
-                  // Emoji
-                  Center(
-                    child: Text(
-                      emojiForAQI,
-                      style: const TextStyle(
-                        fontSize: 40,
+                      const SizedBox(height: 16),
+                      _buildAQITextInfo(localAqi, universalAqi, safeLocalAqi),
+                      const SizedBox(height: 12),
+                      Center(
+                        child: Text(
+                          emojiForAQI,
+                          style: const TextStyle(fontSize: 40),
+                        ),
                       ),
-                    ),
-                  ),
-                ],
-              )
-            : Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // GIF on the left
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.asset(
-                      gifUrl,
-                      width: constraints.maxWidth < 400 ? 60 : 80,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  
-                  // Text in the middle
-                  Expanded(
-                    child: _buildAQITextInfo(localAqi, universalAqi, safeLocalAqi),
-                  ),
-                  
-                  // Emoji on the right
-                  Text(
-                    emojiForAQI,
-                    style: const TextStyle(
-                      fontSize: 48,
-                    ),
-                  ),
-                ],
-              );
-      },
-    ),
+                    ],
+                  )
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.asset(
+                          gifUrl,
+                          width: constraints.maxWidth < 400 ? 60 : 80,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildAQITextInfo(localAqi, universalAqi, safeLocalAqi),
+                      ),
+                      Text(
+                        emojiForAQI,
+                        style: const TextStyle(fontSize: 48),
+                      ),
+                    ],
+                  );
+          },
+        ),
+      ),
+
+      // Location Icon (Top Right)
+      Positioned(
+        top: 10,
+        right: 10,
+        child: IconButton(
+          icon: Icon(Icons.location_on, color: Colors.white),
+          onPressed: checkLocationAndFetch,
+        ),
+      ),
+
+      // Refresh Icon (Top Left)
+      Positioned(
+        top: 10,
+        left: 10,
+        child: IconButton(
+          icon: Icon(Icons.refresh, color: Colors.white),
+          onPressed: widget.locationService.refreshBtnClicked, // Function to refresh AQI data
+        ),
+      ),
+    ],
   );
+
 }
+
 
 
 Widget _buildAQITextInfo(String localAqi, String universalAqi, double safeLocalAqi) {

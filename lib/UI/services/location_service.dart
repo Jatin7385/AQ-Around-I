@@ -38,6 +38,7 @@ class LocationService extends ChangeNotifier {
   
   // Update location and fetch air quality data
   Future<void> updateLocation(double lat, double lng, String name) async {
+    print('location_service :: updateLocation start');
     _latitude = lat;
     _longitude = lng;
     _locationName = name;
@@ -56,6 +57,30 @@ class LocationService extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       print('Error fetching air quality data: $e');
+    } finally {
+      print('location_service :: updateLocation end');
+    }
+  }
+
+  // Update location and fetch air quality data
+  Future<void> refreshBtnClicked() async {
+    print('location_service :: refreshBtnClicked start');
+    // Notify location update (widgets, other services)
+    _locationController.add(LocationData(
+      latitude: _latitude!,
+      longitude: _longitude!,
+      locationName: _locationName!,
+    ));
+    
+    // Fetch air quality data (updates air quality data)
+    try {
+      final newAirQualityData = await AirQualityService.getAirQuality(_latitude!, _longitude!);
+      _airQualityData = newAirQualityData;
+      notifyListeners();
+    } catch (e) {
+      print('Error fetching air quality data: $e');
+    } finally {
+      print('location_service :: refreshBtnClicked end');
     }
   }
   
